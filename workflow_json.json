@@ -1,0 +1,710 @@
+{
+  "name": "OrderlyMeds AI Chat Support",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $('Config').item.json.supportEmail }}",
+        "subject": "={{ $json.Urgency === 'critical' ? '🚨 CRITICAL' : '⚠️ ESCALATION' }} | {{ $json.Topic.replace('_', ' ').toUpperCase() }} | TICKET: {{ $json['Ticket Created'] ? $json['AI Response'].match(/TKT-\\d+/)[0] || 'YES' : 'NO' }}",
+        "message": "===<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\">\n  <h2 style=\"color: {{ $json.urgency === 'critical' ? '#dc3545' : '#fd7e14' }}; margin-bottom: 20px; padding: 15px; background: {{ $json.urgency === 'critical' ? '#fff5f5' : '#fff8e1' }}; border-left: 5px solid {{ $json.urgency === 'critical' ? '#dc3545' : '#ffc107' }};\">\n    {{ $json.isMedicalIssue ? '⚕️ MEDICAL ISSUE - ' : '' }}\n    {{ $json.sentiment === 'angry' ? '😡 ANGRY CUSTOMER' : '⚠️ Escalation Required' }}\n  </h2>\n\n  <div style=\"background: {{ $json.urgency === 'critical' ? '#ffe6e6' : '#fff3cd' }}; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 2px solid {{ $json.urgency === 'critical' ? '#dc3545' : '#ffc107' }};\">\n    <p style=\"margin: 0; font-weight: bold; font-size: 18px; color: {{ $json.urgency === 'critical' ? '#dc3545' : '#856404' }};\">\n      {{ $json.urgency === 'critical' ? '🚨 IMMEDIATE ACTION REQUIRED' : '⚠️ Attention Needed' }}\n    </p>\n    <p style=\"margin: 10px 0 0 0; font-size: 14px;\">\n      A customer interaction requires {{ $json.isMedicalIssue ? 'medical team' : 'immediate' }} review\n    </p>\n  </div>\n\n  <div style=\"background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 20px;\">\n    <h3 style=\"margin-top: 0; color: #333; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;\">📋 Session Details</h3>\n    <table style=\"width: 100%; border-collapse: collapse;\">\n      <tr style=\"border-bottom: 1px solid #dee2e6;\">\n        <td style=\"padding: 12px 8px; font-weight: bold; width: 40%;\">Session ID:</td>\n        <td style=\"padding: 12px 8px;\">{{ $json.sessionId || $json['Session ID'] || 'N/A' }}</td>\n      </tr>\n      <tr style=\"border-bottom: 1px solid #dee2e6;\">\n        <td style=\"padding: 12px 8px; font-weight: bold;\">Customer:</td>\n        <td style=\"padding: 12px 8px;\">{{ $json.customerName || $json['Customer Name'] || 'Unknown' }}<br><small>{{ $json.customerEmail || $json['Customer Email'] || 'No email provided' }}</small></td>\n      </tr>\n      <tr style=\"border-bottom: 1px solid #dee2e6;\">\n        <td style=\"padding: 12px 8px; font-weight: bold;\">Topic:</td>\n        <td style=\"padding: 12px 8px;\"><strong style=\"text-transform: uppercase; color: {{ $json.isMedicalIssue ? '#dc3545' : '#333' }}\">{{ $json.topic || $json.Topic || 'GENERAL' }}</strong></td>\n      </tr>\n      <tr style=\"border-bottom: 1px solid #dee2e6;\">\n        <td style=\"padding: 12px 8px; font-weight: bold;\">Sentiment:</td>\n        <td style=\"padding: 12px 8px;\"><span style=\"display: inline-block; background: {{ $json.sentiment === 'angry' ? '#dc3545' : $json.sentiment === 'frustrated' ? '#ffc107' : $json.sentiment === 'happy' ? '#28a745' : '#6c757d' }}; color: white; padding: 6px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase;\">{{ $json.sentiment || $json.Sentiment || 'NEUTRAL' }}</span></td>\n      </tr>\n      <tr style=\"border-bottom: 1px solid #dee2e6;\">\n        <td style=\"padding: 12px 8px; font-weight: bold;\">Urgency:</td>\n        <td style=\"padding: 12px 8px;\"><span style=\"display: inline-block; background: {{ $json.urgency === 'critical' ? '#dc3545' : $json.urgency === 'high' ? '#fd7e14' : $json.urgency === 'medium' ? '#ffc107' : '#28a745' }}; color: white; padding: 6px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase;\">{{ $json.urgency || $json.Urgency || 'LOW' }}</span></td>\n      </tr>\n      <tr>\n        <td style=\"padding: 12px 8px; font-weight: bold;\">Timestamp:</td>\n        <td style=\"padding: 12px 8px;\">{{ $json.timestamp || $json.Timestamp || 'N/A' }}</td>\n      </tr>\n    </table>\n    {{ $json.ticketCreated ? '<div style=\"background: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #17a2b8;\"><strong>ℹ️ Support Ticket Auto-Created:</strong> The AI has already created a support ticket for this interaction.</div>' : '' }}\n  </div>\n\n  <div style=\"margin-bottom: 20px;\">\n    <h3 style=\"color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px;\">💬 Customer's Message</h3>\n    <div style=\"background: white; padding: 20px; border-left: 4px solid #007bff; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n      <p style=\"margin: 0; white-space: pre-wrap; font-size: 15px; line-height: 1.6;\">{{ $json.chatInput || $json.Message || 'No message content' }}</p>\n    </div>\n  </div>\n\n  <div style=\"margin-bottom: 30px;\">\n    <h3 style=\"color: #333; border-bottom: 2px solid #0056b3; padding-bottom: 8px;\">🤖 AI Response</h3>\n    <div style=\"background: #e7f3ff; padding: 20px; border-left: 4px solid #0056b3; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n      <p style=\"margin: 0; white-space: pre-wrap; font-size: 15px; line-height: 1.6;\">{{ $json.output || $json['AI Response'] || 'No response generated' }}</p>\n    </div>\n  </div>\n\n  <hr style=\"border: none; border-top: 2px solid #dee2e6; margin: 30px 0;\">\n\n  <div style=\"background: {{ $json.isMedicalIssue ? '#fff5f5' : '#f8f9fa' }}; padding: 20px; border-radius: 8px; border: 2px solid {{ $json.isMedicalIssue ? '#dc3545' : '#6c757d' }};\">\n    <p style=\"margin: 0 0 15px 0; font-weight: bold; font-size: 16px; color: {{ $json.isMedicalIssue ? '#dc3545' : '#333' }};\">📋 Required Next Steps:</p>\n    <ul style=\"margin: 0; padding-left: 20px; line-height: 1.8;\">\n      {{ $json.isMedicalIssue ? '<li><strong style=\"color: #dc3545;\">Medical professional review REQUIRED</strong></li><li>Contact customer within <strong>' + ($json.urgency === 'critical' ? '1 HOUR' : '4 hours') + '</strong> at ' + ($json.customerEmail || $json['Customer Email'] || 'phone/email in system') + '</li><li>Document medical concern and provider action taken</li>' : '<li>Review full interaction context and customer history</li><li>Contact customer if issue requires clarification</li>' }}\n      <li>Update support ticket {{ $json.ticketCreated ? 'created by AI' : 'if created' }} with resolution</li>\n      <li>Log resolution in customer record</li>\n    </ul>\n  </div>\n\n  <div style=\"margin-top: 25px; padding: 15px; background: #e9ecef; border-radius: 4px; text-align: center;\">\n    <p style=\"margin: 0; color: #6c757d; font-size: 13px;\">This is an automated escalation alert from the OrderlyMeds AI Support System</p>\n  </div>\n</div>",
+        "options": {}
+      },
+      "id": "d369eab5-a070-43df-b391-c4f0af94ec2c",
+      "name": "Send Escalation Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1152,
+        32
+      ],
+      "webhookId": "escalation-alert-webhook",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SqZKeUcQyZlUbJ6G",
+          "name": "Gmail account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "escalation-condition",
+              "leftValue": "={{ $('Classify & Score').item.json.needsEscalation }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "24a4b2d6-443b-4a48-93bc-53b833b2fd5a",
+              "leftValue": "={{ $('Classify & Score').item.json.ticketCreated }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "43a73c4c-7562-4e09-8390-d43dae9e08ae",
+      "name": "Check Escalation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "11ZAp5vtI_k0-TmD4i-bcsodsZdHU7j3YJ2BTxVIFciM"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Chat Logs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $('Extract Context & Detect Medical').item.json.timestamp }}",
+            "Session ID": "={{ $('Extract Context & Detect Medical').item.json.sessionId }}",
+            "Customer Email": "={{ $('Extract Context & Detect Medical').item.json.customerEmail ? $('Extract Context & Detect Medical').item.json.customerEmail : 'Not Provided' }}",
+            "Customer Name": "={{ $('Extract Context & Detect Medical').item.json.customerName ? $('Extract Context & Detect Medical').item.json.customerName : 'Not Provided' }}",
+            "Message": "={{ $('Extract Context & Detect Medical').item.json.chatInput }}",
+            "AI Response": "={{ $json.output }}",
+            "Sentiment": "={{ $json.sentiment }}",
+            "Topic": "={{ $json.topic }}",
+            "Urgency": "={{ $json.urgency }}",
+            "Needs Escalation": "={{ $json.needsEscalation }}",
+            "Ticket Created": "={{ $json.ticketCreated }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Email",
+              "displayName": "Customer Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Response",
+              "displayName": "AI Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Needs Escalation",
+              "displayName": "Needs Escalation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ticket Created",
+              "displayName": "Ticket Created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "needsEscalation",
+              "displayName": "needsEscalation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ticketCreated",
+              "displayName": "ticketCreated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c69e7075-6421-44a7-bd63-cacf76fad2c4",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        176
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "p94hmnXhtiZetVFj",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatInput = $input.item.json.chatInput || '';\nconst aiOutput = $input.item.json.output || '';\nconst isMedicalQuestion = $input.item.json.isMedicalQuestion || false;\nconst isMedicalUrgent = $input.item.json.isMedicalUrgent || false;\n\nconst angryWords = ['angry', 'furious', 'terrible', 'worst', 'hate', 'ridiculous', 'unacceptable', 'outrageous', 'disgusting', 'pathetic', 'scam', 'fraud', 'lawsuit', 'appalled', 'disgrace'];\nconst frustratedWords = ['frustrated', 'annoying', 'annoyed', 'disappointed', 'upset', 'unhappy'];\nconst happyWords = ['thank', 'thanks', 'great', 'awesome', 'perfect', 'excellent', 'appreciate', 'love', 'wonderful', 'helpful', 'satisfied', 'amazing'];\n\nconst message = chatInput.toLowerCase();\nconst wordCount = chatInput.trim().split(/\\s+/).filter(Boolean).length;\n\nlet sentiment = 'neutral';\nif (wordCount > 3) {\n  if (angryWords.some(w => message.includes(w))) sentiment = 'angry';\n  else if (frustratedWords.some(w => message.includes(w)) && wordCount > 5) sentiment = 'frustrated';\n  else if (happyWords.some(w => message.includes(w))) sentiment = 'happy';\n}\n\nlet topic = 'general';\nif (isMedicalUrgent) topic = 'medical_emergency';\nelse if (isMedicalQuestion) topic = 'medical';\nelse if (/(order|shipping|delivery|tracking|package)/.test(message)) topic = 'order_status';\nelse if (/(bill|charge|payment|refund|subscription|price)/.test(message)) topic = 'billing';\nelse if (/(account|login|password|profile|cancel)/.test(message)) topic = 'account';\nelse if (/(prescription|refill)/.test(message)) topic = 'prescription';\n\nlet urgency = 'low';\nif (isMedicalUrgent) urgency = 'critical';\nelse if (sentiment === 'angry') urgency = 'critical';\nelse if (isMedicalQuestion || topic === 'medical') urgency = 'high';\nelse if (sentiment === 'frustrated' && wordCount > 10) urgency = 'high';\nelse if (topic === 'billing' && /(charge|refund)/.test(message)) urgency = 'medium';\nelse if (topic === 'order_status') urgency = 'medium';\n\nconst ticketCreated = aiOutput.toLowerCase().includes('ticket') && (aiOutput.toLowerCase().includes('created') || aiOutput.toLowerCase().includes('tkt-') || aiOutput.toLowerCase().includes('support ticket'));\n\nconst simpleGreetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'];\nconst isSimpleGreeting = simpleGreetings.some(g => message.trim() === g) || (wordCount <= 3 && topic === 'general' && sentiment === 'neutral');\n\nconst needsEscalation = isSimpleGreeting ? false : (\n  isMedicalUrgent ||\n  (sentiment === 'angry' && wordCount > 5) ||\n  urgency === 'critical' ||\n  ticketCreated ||\n  (topic === 'medical' && !aiOutput.toLowerCase().includes('healthcare provider')) ||\n  (topic === 'billing' && sentiment === 'frustrated' && wordCount > 10)\n);\n\nreturn [{\n  json: {\n    ...($input.item.json),\n    sentiment,\n    topic,\n    urgency,\n    needsEscalation,\n    ticketCreated,\n    isMedicalIssue: topic.includes('medical')\n  }\n}];"
+      },
+      "id": "84dc5ec6-4086-47e3-a3f2-58803a194c55",
+      "name": "Classify & Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "name": "create_support_ticket",
+        "description": "Create a support ticket for issues requiring human review. ALWAYS use this for: medical questions/symptoms/side effects, billing disputes, refund requests, account changes, technical escalations, angry/frustrated customers, or when you don't have accurate information.",
+        "jsCode": "const issue = $input.params.issue || 'No description provided';\nconst priority = $input.params.priority || 'medium';\nconst category = $input.params.category || 'general';\nconst customerEmail = $input.params.customer_email || 'unknown';\nconst customerName = $input.params.customer_name || 'Unknown';\n\n// Medical questions ALWAYS get high priority minimum\nlet finalPriority = priority;\nif (category === 'medical' || category === 'medical_emergency') {\n  if (priority === 'low' || priority === 'medium') {\n    finalPriority = 'high';\n  }\n}\n\nconst ticketId = 'TKT-' + Date.now();\n\nconst slaHours = {\n  'critical': 1,\n  'high': 4,\n  'medium': 24,\n  'low': 48\n}[finalPriority];\n\nconst departmentRouting = {\n  'medical': 'Medical Team',\n  'medical_emergency': 'Medical Team - URGENT',\n  'billing': 'Billing Department',\n  'technical': 'Technical Support',\n  'account': 'Account Management',\n  'general': 'Customer Support'\n};\n\nconst department = departmentRouting[category] || 'Customer Support';\n\n// CRITICAL: Return a STRING, not an object\nreturn `✅ Support ticket ${ticketId} has been created with ${finalPriority} priority and routed to ${department}. ${category.includes('medical') ? 'Our medical team' : 'A team member'} will contact you within ${slaHours} hours at ${customerEmail}.`;",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"issue\": \"Customer experiencing nausea after starting medication\",\n  \"priority\": \"high\",\n  \"category\": \"medical\",\n  \"customer_email\": \"customer@example.com\",\n  \"customer_name\": \"Jane Doe\"\n}"
+      },
+      "id": "c104be95-48e2-407c-800d-ea96e1691fe4",
+      "name": "Create Support Ticket Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Extract Context & Detect Medical').item.json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "id": "9ab532c8-2afc-4722-93d7-a71fd65ec18c",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "e880b0a6-e632-4bd4-a7b9-051962eb8d02",
+      "name": "Groq Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        48,
+        544
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "fVkflVApULX4HDFg",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Extract Context & Detect Medical').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "==You are OrderlyMeds' professional customer support AI assistant. You help customers with questions about our GLP-1 weight management platform. Your primary goal is to **resolve the customer's issue directly** using your knowledge and available tools.\n\n🔴 **CRITICAL MEDICAL SAFETY RULES - NEVER VIOLATE:**\n1. NEVER provide medical advice, diagnoses, or treatment recommendations\n2. NEVER tell customers whether they should or shouldn't take medications\n3. NEVER interpret symptoms, side effects, or medical test results\n4. NEVER recommend dosage changes or medication adjustments\n5. ALWAYS refer ALL medical questions to healthcare providers\n6. If a customer mentions ANY health symptoms, side effects, or medical concerns, you MUST respond with: \"I'm not a medical professional and cannot provide medical advice. Please contact your prescribing healthcare provider or our medical team immediately. For medical questions, call {{ $('Config').item.json.medicalHotline }}. For emergencies, call 911.\"\n\n✅ **WHAT YOU CAN HELP WITH (AND MUST TRY TO RESOLVE DIRECTLY):**\n- Account setup, login issues, password resets (Guide the customer through the steps)\n- Order status, tracking, and shipping questions (use `check_order_status` tool)\n- General information about the platform and process\n\n📋 **TOOL USAGE RULES:**\n- **CRITICAL PII CHECK:** Before calling `create_support_ticket`, you MUST have the customer's **email address** and **name**. If either is missing, politely ask the customer to provide them first. Only proceed with the tool once both are available.\n- **TICKET CREATION (LAST RESORT):** You **MUST NOT** call `create_support_ticket` unless:\n    a) The issue is a **billing dispute, refund request, or account change** (as you cannot perform these actions).\n    b) Your tools or knowledge **confirm the issue is unresolvable** by the AI (e.g., order is missing, tracking is unavailable, or a system error is confirmed).\n    c) The customer confirms they need a ticket because your **self-service attempts failed** (e.g., \"I tried the steps you gave me, but I still need a ticket.\").\n- **STRICT DUPLICATE TICKET CHECK:** If you have successfully created a ticket in this session, you **MUST NOT** call the tool again unless the customer provides a **NEW and DIFFERENT issue description**. Simply asking to \"create another ticket\" is NOT enough.\n- For order status questions: Use `check_order_status` tool with the order ID or email\n- After creating a ticket, tell the customer the ticket number and when they'll be contacted. Do not ask follow-up questions.\n\n📋 **RESPONSE GUIDELINES:**\n- **DO NOT HALLUCINATE:** If you do not have the answer to a specific factual question (like \"founder's name,\" \"history,\" or \"specific policy details\") in your knowledge base, you **MUST politely state you do not have that specific information** and offer to create a ticket for a human team member who can follow up.\n- Be professional, empathetic, warm, and concise\n- Keep responses under 200 words unless more detail is specifically requested\n- Never return raw JSON to the customer - always provide a friendly, conversational response\n- After using a tool, explain what you did in plain language\n\n**CURRENT CUSTOMER CONTEXT:**\n{% if $('Extract Context & Detect Medical').item.json.customerName %}Customer Name: {{ $('Extract Context & Detect Medical').item.json.customerName }}\n{% endif %}{% if $('Extract Context & Detect Medical').item.json.customerEmail %}Customer Email: {{ $('Extract Context & Detect Medical').item.json.customerEmail }}\n{% endif %}{% if $('Extract Context & Detect Medical').item.json.isMedicalQuestion %}⚠️ **MEDICAL QUESTION DETECTED** - Use medical disclaimer and suggest contacting healthcare provider\n{% endif %}\nSession ID: {{ $('Extract Context & Detect Medical').item.json.sessionId }}\nTimestamp: {{ $('Extract Context & Detect Medical').item.json.timestamp }}"
+        }
+      },
+      "id": "2958c254-2391-475f-96a1-da0af2b4f9ce",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        48,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "urgent-output",
+              "name": "output",
+              "type": "string",
+              "value": "=**MEDICAL EMERGENCY DETECTED**\n\nI've detected keywords that suggest a potential medical emergency.\n\n**Please take immediate action:**\n\n1. **If this is life-threatening:** Call 911 or go to the nearest emergency room immediately\n2. **For urgent medical concerns:** Contact your prescribing healthcare provider right away  \n3. **OrderlyMeds Medical Team:** Call {{ $('Config').item.json.medicalHotline }} for immediate assistance\n\n⚠️ I'm an AI assistant and cannot provide emergency medical advice or diagnose conditions. Your safety is our absolute top priority.\n\n✅ **A critical support ticket has been created** and our medical team has been notified. They will reach out to you as soon as possible."
+            },
+            {
+              "id": "urgent-escalate",
+              "name": "needsEscalation",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "urgent-level",
+              "name": "urgency",
+              "type": "string",
+              "value": "critical"
+            },
+            {
+              "id": "urgent-topic",
+              "name": "topic",
+              "type": "string",
+              "value": "medical_emergency"
+            },
+            {
+              "id": "urgent-sentiment",
+              "name": "sentiment",
+              "type": "string",
+              "value": "urgent"
+            },
+            {
+              "id": "urgent-ticket",
+              "name": "ticketCreated",
+              "type": "boolean",
+              "value": true
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "032d9ff6-565b-4ddb-9d26-bd7b4c35b8bf",
+      "name": "Emergency Medical Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        48,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "urgent-medical-check",
+              "leftValue": "={{ $('Extract Context & Detect Medical').item.json.isMedicalUrgent }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a817ab81-a697-4d3d-a8dd-e2f18fdfacaf",
+      "name": "Check Medical Urgency",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg5",
+              "name": "groqModel",
+              "type": "string",
+              "value": "llama-3.3-70b-versatile"
+            },
+            {
+              "id": "cfg6",
+              "name": "medicalHotline",
+              "type": "string",
+              "value": "1-800-ORDERLY"
+            },
+            {
+              "id": "cfg7",
+              "name": "supportEmail",
+              "type": "string",
+              "value": "theemusicalspirit@gmail.com"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "dd42a999-1fb1-43ab-8685-3a463514eb43",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatMessage = $input.item.json.chatInput;\nconst sessionId = $input.item.json.sessionId;\n\n// Extract email\nconst emailRegex = /\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b/;\nconst emailMatch = chatMessage?.match(emailRegex);\n\n// Extract name\nconst namePatterns = [\n  /my name is ([A-Za-z\\s]+)/i,\n  /I'm ([A-Za-z\\s]+)/i,\n  /I am ([A-Za-z\\s]+)/i,\n  /this is ([A-Za-z\\s]+)/i,\n  /call me ([A-Za-z\\s]+)/i\n];\n\nlet customerName = null;\nfor (const pattern of namePatterns) {\n  const match = chatMessage?.match(pattern);\n  if (match) {\n    customerName = match[1].trim();\n    break;\n  }\n}\n\n// Urgent medical keywords (exact phrases)\nconst urgentMedicalKeywords = [\n  'severe pain', 'chest pain', 'difficulty breathing',\n  \"can't breathe\", 'cannot breathe', 'allergic reaction',\n  'severe swelling', 'throat closing', 'anaphylaxis',\n  'vomiting blood', 'severe dizziness', 'passing out',\n  'heart racing', 'seizure', 'overdose', 'poisoning',\n  'unconscious', 'choking', 'stroke', 'heart attack'\n];\n\n// General medical question markers\nconst medicalQuestionKeywords = [\n  'side effect', 'adverse reaction', 'symptom',\n  'medication interaction', 'drug interaction',\n  'should i take', 'can i take', 'safe to take',\n  'medical condition', 'health concern',\n  'nausea', 'vomiting', 'severe headache',\n  'rash', 'swelling', 'bleeding'\n];\n\nconst contextualMedicalWords = ['dosage', 'dose', 'prescription'];\n\nconst messageLower = (chatMessage || '').toLowerCase().trim();\nconst wordCount = messageLower.split(/\\s+/).filter(Boolean).length;\n\n// CRITICAL FIX: Skip medical detection for greetings and very short messages\nlet isMedicalUrgent = false;\nlet isMedicalQuestion = false;\n\n// List of common greetings to exclude\nconst greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings'];\nconst isGreeting = greetings.some(g => messageLower === g || messageLower === g + '!');\n\n// Only check medical keywords if message is NOT a greeting and has enough words\nif (!isGreeting && wordCount > 2) {\n  // Check for urgent medical keywords (must be exact phrase matches)\n  isMedicalUrgent = urgentMedicalKeywords.some(phrase => {\n    // Create regex with word boundaries to avoid false matches\n    const escapedPhrase = phrase.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n    const regex = new RegExp('\\\\b' + escapedPhrase + '\\\\b', 'i');\n    return regex.test(messageLower);\n  });\n  \n  // Check for general medical questions\n  const hasMedicalKeyword = medicalQuestionKeywords.some(kw => {\n    const escapedKw = kw.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n    const regex = new RegExp('\\\\b' + escapedKw + '\\\\b', 'i');\n    return regex.test(messageLower);\n  });\n  \n  const hasContextualMedical = contextualMedicalWords.some(kw => {\n    const regex = new RegExp('\\\\b' + kw + '\\\\b', 'i');\n    return regex.test(messageLower);\n  });\n  \n  isMedicalQuestion = (hasMedicalKeyword && wordCount > 3) ||\n    (hasContextualMedical && wordCount > 5 && (messageLower.includes('change') || messageLower.includes('adjust')));\n}\n\nreturn [{\n  json: {\n    chatInput: chatMessage || '',\n    sessionId: sessionId || 'sess-' + Date.now(),\n    customerEmail: emailMatch ? emailMatch[0] : null,\n    customerName: customerName,\n    timestamp: new Date().toISOString(),\n    isMedicalUrgent: isMedicalUrgent,\n    isMedicalQuestion: isMedicalQuestion,\n    rawInput: $input.item.json\n  }\n}];"
+      },
+      "id": "6cd9e369-c604-43e4-ba0d-6ccb8f6ac0bc",
+      "name": "Extract Context & Detect Medical",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c3631bbe-6f60-4477-8d19-5ebe3c7c852c",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        176
+      ],
+      "webhookId": "orderlymeds-chat-support"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "623778d5-8303-4362-9596-d390e855906c",
+              "name": "output",
+              "value": "={{ $('Classify & Score').item.json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1408,
+        192
+      ],
+      "id": "7ee107e6-7062-4927-8770-dd2ba2fd29d7",
+      "name": "Format Chat Response"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check Escalation": {
+      "main": [
+        [
+          {
+            "node": "Send Escalation Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Check Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify & Score": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Support Ticket Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Classify & Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emergency Medical Response": {
+      "main": [
+        [
+          {
+            "node": "Classify & Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Medical Urgency": {
+      "main": [
+        [
+          {
+            "node": "Emergency Medical Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Check Medical Urgency",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Context & Detect Medical": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Extract Context & Detect Medical",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Escalation Alert": {
+      "main": [
+        [
+          {
+            "node": "Format Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "aa87da52-2dca-47ef-b84b-321fc8806b31",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e83518343432b5658eab38cbde634bbd9b22c5a221ae63c5e818c07980ef654b"
+  },
+  "id": "nX0tCDSyJAzPW1lf",
+  "tags": []
+}
