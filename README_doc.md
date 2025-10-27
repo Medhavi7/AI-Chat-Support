@@ -169,7 +169,6 @@ Test the workflow with these sample inputs:
 ```
 "Hi" → Should respond without escalation
 "I'm having severe chest pain" → Should trigger emergency response
-"Where is my order?" → Should offer to check status
 "I want a refund!" → Should create ticket and escalate
 "My name is John Doe and email is john@example.com" → Should extract PII
 ```
@@ -177,7 +176,7 @@ Test the workflow with these sample inputs:
 ## File Structure
 
 ```
-├── orderlymeds-workflow-sanitized.json  # Main workflow file
+├── orderlymeds-workflow.json            # Main workflow file
 └── README.md                            # This documentation
 ```
 
@@ -185,7 +184,7 @@ Test the workflow with these sample inputs:
 
 1. Open your n8n instance
 2. Click "Workflows" → "Import from File"
-3. Select `orderlymeds-workflow-sanitized.json`
+3. Select `orderlymeds-workflow.json`
 4. Update all REDACTED credential IDs with your own
 5. Configure the Google Sheet ID
 6. Test with sample messages
